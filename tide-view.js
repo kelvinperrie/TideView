@@ -7,8 +7,10 @@ san = function(value) {
 var GraphModel = function() {
     var self = this;
 
-    self.canvasWidth = 800;
-    self.canvasHeight = 500;
+    var canvas = document.getElementById('canvas');
+    
+    self.canvasWidth = canvas.width;
+    self.canvasHeight = canvas.height;
     self.graphTop = 30;
     self.graphFooterHeight = 70;
     self.graphHeight = self.canvasHeight - (self.graphTop + self.graphFooterHeight);
@@ -21,11 +23,17 @@ var GraphModel = function() {
     self.verticalFactor = self.graphHeight  / self.maxYValue;
     self.yAxisIncrement = 0.25;
 
+    self.lat = 0;
+    self.long = 0;
+    self.days = 0;
+
     self.plotData = [];
 
     self.draw = function() {
         var canvas = document.getElementById('canvas');
         var ctx = canvas.getContext('2d');
+
+        ctx.clearRect(0, 0, self.canvasWidth, self.canvasHeight);
 
         var plotWidth = self.graphWidth / self.plotData.length;
 
@@ -60,11 +68,13 @@ var GraphModel = function() {
         }
         ctx.restore();
 
-        // draw the vertical bars for the date changes
-        var previousTime = null;
+        // draw vertical grid lines
+        var previousDate = null;
         for(var i = 0; i < self.plotData.length; i++) {
-            var thisTime = self.plotData[i].time.substring(0, 10);
-            if(previousTime && previousTime != thisTime) {
+            var thisDate = self.plotData[i].time.substring(0, 10);
+            var thisTime = self.plotData[i].time.substring(11,19);
+            // draw the vertical bars for the date changes
+            if(previousDate && previousDate != thisDate) {
                 // the date has just changed ...
                 var x = self.graphLeft + (i * plotWidth);
                 x = Math.floor(x) + 0.5;
@@ -85,27 +95,73 @@ var GraphModel = function() {
 
                 ctx.restore();
             }
+            // draw lesser lines at lunchtime
+            // don't draw one if first time is lunchtime
+            if(i > 0 && thisTime == "12:00:00") {
+                var x = san(self.graphLeft + (i * plotWidth));
+                ctx.save();
+                ctx.beginPath();
+                ctx.setLineDash([8, 8]);
+                ctx.strokeStyle = '#d1d1d1';
+                ctx.moveTo(x, self.graphTop);
+                ctx.lineTo(x, self.graphBottom);
+                ctx.stroke();
+                ctx.restore();
+            }
 
-            previousTime = thisTime;
+            previousDate = thisDate;
         }
 
         // draw the tide height values
+        var direction = "increasing";
         for(var i = 0; i < self.plotData.length; i++) {
             var x = self.graphLeft + (i * plotWidth);
             var y = self.graphBottom - (self.verticalFactor * self.plotData[i].value);
             //console.log("drawing data " + i + " at " + x + "," + y);
             ctx.save();
-            //ctx.translate(x, y);
             ctx.beginPath();
             ctx.arc(x, y, 1, 0, 2 * Math.PI);
             ctx.stroke();
             ctx.restore();
+
+            // draw the labels at high and low tides indicating the times
+            if(i < self.plotData.length -1) {
+                if(direction === "increasing" && self.plotData[i].value > self.plotData[i+1].value) {
+                    direction = "decreasing";
+                    
+                    ctx.save();
+                    ctx.beginPath();
+                    ctx.textBaseline = 'middle';
+                    ctx.textAlign = 'left';
+                    ctx.font = '10px serif';
+                    ctx.translate(x, y);
+                    ctx.rotate(270 * Math.PI / 180);
+                    ctx.fillText(self.plotData[i].time.substring(11,16), 5, 0);
+                    ctx.stroke();
+                    ctx.restore();
+
+                } else if(direction === "decreasing" && self.plotData[i].value < self.plotData[i+1].value) {
+                    direction = "increasing";
+                    
+                    ctx.save();
+                    ctx.beginPath();
+                    ctx.textBaseline = 'middle';
+                    ctx.textAlign = 'right';
+                    ctx.font = '10px serif';
+                    ctx.translate(x, y);
+                    ctx.rotate(270 * Math.PI / 180);
+                    ctx.fillText(self.plotData[i].time.substring(11,16), -5, 0);
+                    ctx.stroke();
+                    ctx.restore();
+                    
+                }
+            }
         }
     };
 
     
     self.parseData = function(data) {
-        // i dunno, seems good enough
+        // i dunno, seems good enough for now
         self.plotData = data.values;
         self.draw();
     };
@@ -116,12 +172,18 @@ var GraphModel = function() {
         $.ajax({
             method: "GET",
             url: "https://api.niwa.co.nz/tides/data?datum=LAT&apikey=bUkpipT5MeooRJdzSaeXssGiWtmvXizG",
-            data: { lat: -39.1196925, long: 173.9669005, interval: 10, numberOfDays: 5 }
+            data: { lat: self.lat, long: self.long, interval: 10, numberOfDays: self.days }
         })
         .done(function( data ) {
             console.log(data);
             self.parseData(data);
         });
     };
-    self.getData();
+
+    self.createGraph = function(lat, long, days) {
+        self.lat = lat;
+        self.long = long;
+        self.days = days;
+        self.getData();
+    }
 };
