@@ -90,7 +90,7 @@ var GraphModel = function() {
                 var output = plotMoment.format("ddd Do MMM");
                 //ctx.moveTo(x, self.graphBottom);
                 ctx.beginPath();
-                ctx.fillText(output, x + 4, self.graphBottom);
+                ctx.fillText(output, x + 4, self.graphBottom + 15);
                 ctx.stroke();
 
                 ctx.restore();
