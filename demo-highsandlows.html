@@ -1,0 +1,38 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <title>ttt</title>
+    <meta charset="utf-8"/>
+    <link rel="stylesheet" href="pure-min.css" >
+    <style type="text/css">
+        body {
+            font-family: "Fira", Helvetica, Arial, sans-serif;
+            margin: 0;
+            text-align: center;
+            color: #6b6b6b;
+        }
+        canvas {
+            border: 1px solid #d0d0d0;
+            background-color: #fff;
+        }
+        .everything {
+            margin: auto;
+        }
+    </style>
+</head>
+<body onload="">
+    <canvas id="canvas" width="1400" height="500"></canvas>
+
+    <script src="jquery-3.3.1.min.js" type="text/javascript"></script>
+    <script src="moment.js" type="text/javascript"></script>
+    <script src="tide-view2.js" type="text/javascript"></script>
+    <script type="text/javascript">
+
+        $(document).ready(function () {
+
+            var model = new TideModel(data);
+        });
+
+    </script>
+</body>
+</html>
