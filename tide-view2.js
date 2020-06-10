@@ -6,68 +6,102 @@ san = function(value) {
 var TideModel = function(data) {
     var self = this;
 
-    var canvas = document.getElementById('canvas');
+    self.canvasId = 'canvas';
+    self.canvas = document.getElementById('canvas');
+    self.ctx = self.canvas.getContext('2d');
     
-    self.canvasWidth = canvas.width;
-    self.canvasHeight = canvas.height;
-    self.graphTop = 30;
-    self.graphFooterHeight = 70;
-    self.graphHeight = self.canvasHeight - (self.graphTop + self.graphFooterHeight);
-    self.graphBottom = self.graphHeight + self.graphTop;
-    self.graphLeft = 30;
-    self.graphWidth = self.canvasWidth - self.graphLeft;
-    self.horizontalMidLine = self.graphHeight / 2;
-    self.maxYValue = 4;
-    self.minYValue = 0;
-    self.verticalFactor = self.graphHeight  / self.maxYValue;
-    self.yAxisIncrement = 0.25;
+    self.expectedGraphHeight = 500;
+    self.canvasWidth = self.canvas.width;
+    self.canvasHeight = self.canvas.height;
 
-    self.lat = 0;
-    self.long = 0;
-    self.days = 0;
 
-    self.plotData = [];
+    self.graphs = [];
 
     self.draw = function() {
-        self.drawGraph(self.plotData.slice(0, 30));
+        var graphCount = self.graphs.length;
+        $("#"+self.canvasId).attr("height", self.expectedGraphHeight * graphCount);
+        
+        self.canvasWidth = canvas.width;
+        self.canvasHeight = canvas.height;
+        self.ctx.clearRect(0, 0, self.canvasWidth, self.canvasHeight);
+        
+
+        // self.ctx.save();
+        // self.ctx.strokeStyle = '#ff0000';
+        // self.ctx.beginPath();
+        // self.ctx.arc(50, 30, 1, 0, 2 * Math.PI);
+        // self.ctx.stroke();
+        // self.ctx.beginPath();
+        // self.ctx.arc(50, 430, 1, 0, 2 * Math.PI);
+        // self.ctx.stroke();
+        // self.ctx.beginPath();
+        // self.ctx.arc(50, 500, 1, 0, 2 * Math.PI);
+        // self.ctx.stroke();
+        // self.ctx.restore();
+
+
+
+
+        self.drawAllGraphs();
     };
 
-    self.drawGraph = function(graphPlotData) {
+    self.drawAllGraphs = function() {
 
+        for(var i = 0; i < self.graphs.length; i++) {
+            var settings = new graphSettings(self.expectedGraphHeight, self.canvas.width, i * self.expectedGraphHeight)
+            self.drawGraph(self.graphs[i], settings);
+        }
+    };
 
+    self.drawGraph = function(graphData, graphSettings) {
+        console.log("drawing graph")
+        console.log(graphSettings);
+        console.log(graphData);
+        var graphPlotData = graphData.plots;
         var canvas = document.getElementById('canvas');
         var ctx = canvas.getContext('2d');
 
-        ctx.clearRect(0, 0, self.canvasWidth, self.canvasHeight);
+        //ctx.clearRect(0, 0, self.canvasWidth, self.canvasHeight);
 
-        var plotWidth = self.graphWidth / graphPlotData.length;
+        var plotWidth = graphSettings.dataWidth / graphPlotData.length;
 
+        // draw the graph label
+        ctx.save();
+        ctx.beginPath();
+        ctx.textBaseline = 'middle';
+        ctx.textAlign = 'center';
+        ctx.font = '50px sans-serif';
+        ctx.translate(50, graphSettings.dataHorizontalMidLine);
+        ctx.rotate(270 * Math.PI / 180);
+        ctx.fillText(graphData.month, 0, 0);
+        ctx.stroke();
+        ctx.restore();
 
         // draw the y axis
         ctx.beginPath();
-        ctx.moveTo(self.graphLeft, self.graphTop);
-        ctx.lineTo(self.graphLeft, self.graphBottom);
+        ctx.moveTo(graphSettings.dataLeft, graphSettings.dataTop);
+        ctx.lineTo(graphSettings.dataLeft, graphSettings.dataBottom);
         ctx.stroke();
         // draw y axis labels
         ctx.save();
         ctx.textBaseline = 'middle';
         ctx.textAlign = 'right';
         ctx.font = '10px serif';
-        for(var i = self.minYValue + self.yAxisIncrement; i < self.maxYValue; i+=self.yAxisIncrement) {
+        for(var i = graphSettings.minYValue + graphSettings.yAxisIncrement; i < graphSettings.maxYValue; i+=graphSettings.yAxisIncrement) {
             ctx.save();
             ctx.beginPath();
-            var y = self.graphBottom - (self.verticalFactor * i);
+            var y = graphSettings.dataBottom - (graphSettings.verticalFactor * i);
             y = san(y);
-            ctx.fillText(i, self.graphLeft-4, y, 30);
-            ctx.moveTo(self.graphLeft-2, y);
-            ctx.lineTo(self.graphLeft+2, y);
+            ctx.fillText(i, graphSettings.dataLeft-4, y, 30);
+            ctx.moveTo(graphSettings.dataLeft-2, y);
+            ctx.lineTo(graphSettings.dataLeft+2, y);
             ctx.stroke();
             
             // draw a horizontal grid line
             ctx.beginPath();
             ctx.strokeStyle = '#d1d1d1';
-            ctx.moveTo(self.graphLeft+4, y);
-            ctx.lineTo(self.canvasWidth, y);
+            ctx.moveTo(graphSettings.dataLeft+4, y);
+            ctx.lineTo(graphSettings.dataRight, y);
             ctx.stroke();
             ctx.restore();
         }
@@ -77,65 +111,25 @@ var TideModel = function(data) {
         //var previousDate = null;
         for(var i = 0; i < graphPlotData.length; i++) {
 
-            var x = self.graphLeft + (i * plotWidth);
+            var x = graphSettings.dataLeft + (i * plotWidth);
             x = Math.floor(x) + 0.5;
             ctx.save();
             // draw a vertical grid line
             ctx.beginPath();
             ctx.strokeStyle = '#DBDBDB';
-            ctx.moveTo(x, self.graphTop);
-            ctx.lineTo(x, self.graphBottom);
+            ctx.moveTo(x, graphSettings.dataTop);
+            ctx.lineTo(x, graphSettings.dataBottom);
             ctx.stroke();
             // put the date in ... somewhere
-            //var plotMoment = moment.utc(self.plotData[i].time);
+            //var plotMoment = moment.utc(graphSettings.plotData[i].time);
             var output = graphPlotData[i].dayMoment.format("D");
-            //ctx.moveTo(x, self.graphBottom);
+            //ctx.moveTo(x, graphSettings.dataBottom);
             ctx.beginPath();
-            ctx.fillText(output, x + 4, self.graphBottom + 15);
+            ctx.fillText(output, x + 4, graphSettings.dataBottom + 15);
             ctx.stroke();
 
             ctx.restore();
 
-
-            // var thisDate = self.plotData[i].time.substring(0, 10);
-            // var thisTime = self.plotData[i].time.substring(11,19);
-            // // draw the vertical bars for the date changes
-            // if(previousDate && previousDate != thisDate) {
-            //     // the date has just changed ...
-            //     var x = self.graphLeft + (i * plotWidth);
-            //     x = Math.floor(x) + 0.5;
-            //     ctx.save();
-            //     // draw a vertical grid line
-            //     ctx.beginPath();
-            //     ctx.strokeStyle = '#d1d1d1';
-            //     ctx.moveTo(x, self.graphTop);
-            //     ctx.lineTo(x, self.graphBottom);
-            //     ctx.stroke();
-            //     // put the date in ... somewhere
-            //     var plotMoment = moment.utc(self.plotData[i].time);
-            //     var output = plotMoment.format("ddd Do MMM");
-            //     //ctx.moveTo(x, self.graphBottom);
-            //     ctx.beginPath();
-            //     ctx.fillText(output, x + 4, self.graphBottom + 15);
-            //     ctx.stroke();
-
-            //     ctx.restore();
-            // }
-            // // draw lesser lines at lunchtime
-            // // don't draw one if first time is lunchtime
-            // if(i > 0 && thisTime == "12:00:00") {
-            //     var x = san(self.graphLeft + (i * plotWidth));
-            //     ctx.save();
-            //     ctx.beginPath();
-            //     ctx.setLineDash([8, 8]);
-            //     ctx.strokeStyle = '#d1d1d1';
-            //     ctx.moveTo(x, self.graphTop);
-            //     ctx.lineTo(x, self.graphBottom);
-            //     ctx.stroke();
-            //     ctx.restore();
-            // }
-
-            // previousDate = thisDate;
         }
 
         // draw the tide height values
@@ -147,8 +141,8 @@ var TideModel = function(data) {
                 var thisTide = graphPlotData[i].tides[j];
                 var percentageIndent = thisTide.tideMoment.format("HHmm") / 2400;
 
-                var x = self.graphLeft + (i * plotWidth) + (plotWidth * percentageIndent);
-                var y = self.graphBottom - (self.verticalFactor * thisTide.height);
+                var x = graphSettings.dataLeft + (i * plotWidth) + (plotWidth * percentageIndent);
+                var y = graphSettings.dataBottom - (graphSettings.verticalFactor * thisTide.height);
                 ctx.save();
                 ctx.beginPath();
                 ctx.arc(x, y, 1, 0, 2 * Math.PI);
@@ -228,20 +222,64 @@ var TideModel = function(data) {
             var dateString = `${parts[0]}-${parts[2]}-${parts[3]} 00:00`;
             var date = moment(dateString, "DD-MM-YYYY HH:mm")
             var tides = ParseTides();
-            self.plotData.push({
+            return {
                 dayMoment: date,
                 tides: tides
-            });
+            };
         }
 
         var lines = data.split(/\r?\n/);
+        var graphData = null;
+        var graphCount = -1;
+        var month = "";
         for(var i = 0; i < lines.length; i++) {
             var parts = lines[i].split(",");
+            // a heap of the lines are random garbage, ignore them if they don't look like what we want
             if(parts.length===12) {
-                ParseDay(parts);
+                // what is the date / month for this line
+                var dateString = `${parts[0]}-${parts[2]}-${parts[3]} 00:00`;
+                var date = moment(dateString, "DD-MM-YYYY HH:mm")
+                var thisMonth = date.format("MMMM");
+                // if this is a new month then start the data for a new graph and put it into our data set
+                if(thisMonth !== month) {
+                    console.log("doing data for " + thisMonth)
+                    month = thisMonth;
+                    graphCount = graphCount + 1;
+                    var yOffset = (graphCount + 1) * self.expectedGraphHeight;
+                    graphData = {
+                        month : thisMonth,
+                        plots : [],
+                        graphSettings : {
+
+                        }
+                    };
+                    self.graphs.push(graphData);
+                }
+                var day = ParseDay(parts);
+                self.graphs[graphCount].plots.push(day);
             }
         }
         console.log(self.plotData)
+    };
+
+    var graphSettings = function(expectedGraphHeight, expectedGraphWidth, yOffset) {
+        var self = this;
+
+        self.graphTop = yOffset;
+        self.yTopMargin = 30;
+        self.dataTop = yOffset + self.yTopMargin;
+        self.yBottomMargin = 70;
+        self.dataHeight = expectedGraphHeight - (self.yTopMargin + self.yBottomMargin);
+        self.dataBottom = self.dataHeight + self.dataTop;
+        self.dataLeft = 100;
+        self.dataRight = expectedGraphWidth;
+        self.dataWidth = expectedGraphWidth - self.dataLeft;
+        self.dataHorizontalMidLine = self.dataTop + (self.dataHeight / 2);
+        self.maxYValue = 4;
+        self.minYValue = 0;
+        self.verticalFactor = self.dataHeight  / self.maxYValue,
+        self.yAxisIncrement = 0.25;
+        self.yOffset = yOffset;
     };
 
     self.initialize = function() {
