@@ -111,7 +111,7 @@ var TideModel = function(data) {
             
             // draw a horizontal grid line
             ctx.beginPath();
-            ctx.strokeStyle = '#d1d1d1';
+            ctx.strokeStyle = '#EFEFEF';
             ctx.moveTo(graphSettings.dataLeft+4, y);
             ctx.lineTo(graphSettings.dataRight-4, y);
             ctx.stroke();
@@ -120,7 +120,6 @@ var TideModel = function(data) {
         ctx.restore();
 
         // draw vertical grid lines
-        //var previousDate = null;
         for(var i = 0; i < graphPlotData.length; i++) {
 
             var x = graphSettings.dataLeft + (i * plotWidth);
@@ -128,20 +127,18 @@ var TideModel = function(data) {
             ctx.save();
             // draw a vertical grid line
             ctx.beginPath();
-            ctx.strokeStyle = '#DBDBDB';
+            ctx.strokeStyle = '#EFEFEF';
             ctx.moveTo(x, graphSettings.dataTop);
             ctx.lineTo(x, graphSettings.dataBottom);
             ctx.stroke();
-            // put the date in ... somewhere
-            //var plotMoment = moment.utc(graphSettings.plotData[i].time);
+            // x axis labels - put the date in ... somewhere
             var output = graphPlotData[i].dayMoment.format("D");
-            //ctx.moveTo(x, graphSettings.dataBottom);
             ctx.beginPath();
-            ctx.fillText(output, x + 4, graphSettings.dataBottom + 15);
+            ctx.textAlign = 'center';
+            ctx.fillText(output, x + (plotWidth / 2), graphSettings.dataBottom + 15);
             ctx.stroke();
 
             ctx.restore();
-
         }
 
         // draw the tide height values
@@ -172,38 +169,6 @@ var TideModel = function(data) {
                 ctx.stroke();
                 ctx.restore();
             }
-            // draw the labels at high and low tides indicating the times
-            // if(i < self.plotData.length -1) {
-            //     if(direction === "increasing" && self.plotData[i].value > self.plotData[i+1].value) {
-            //         direction = "decreasing";
-                    
-            //         ctx.save();
-            //         ctx.beginPath();
-            //         ctx.textBaseline = 'middle';
-            //         ctx.textAlign = 'left';
-            //         ctx.font = '10px serif';
-            //         ctx.translate(x, y);
-            //         ctx.rotate(270 * Math.PI / 180);
-            //         ctx.fillText(self.plotData[i].time.substring(11,16), 5, 0);
-            //         ctx.stroke();
-            //         ctx.restore();
-
-            //     } else if(direction === "decreasing" && self.plotData[i].value < self.plotData[i+1].value) {
-            //         direction = "increasing";
-                    
-            //         ctx.save();
-            //         ctx.beginPath();
-            //         ctx.textBaseline = 'middle';
-            //         ctx.textAlign = 'right';
-            //         ctx.font = '10px serif';
-            //         ctx.translate(x, y);
-            //         ctx.rotate(270 * Math.PI / 180);
-            //         ctx.fillText(self.plotData[i].time.substring(11,16), -5, 0);
-            //         ctx.stroke();
-            //         ctx.restore();
-                    
-            //     }
-            // }
         }
     };
 
