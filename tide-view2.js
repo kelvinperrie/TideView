@@ -165,7 +165,8 @@ var TideModel = function(data) {
                 ctx.font = '10px serif';
                 ctx.translate(x, y);
                 ctx.rotate(270 * Math.PI / 180);
-                ctx.fillText(thisTide.tideMoment.format("HH:mm"), 5, 0);
+                var plotLabel = thisTide.height + " - " + thisTide.tideMoment.format("HH:mm");
+                ctx.fillText(plotLabel, 5, 0);
                 ctx.stroke();
                 ctx.restore();
             }
