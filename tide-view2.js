@@ -82,26 +82,38 @@ var TideModel = function(data) {
         ctx.moveTo(graphSettings.dataLeft, graphSettings.dataTop);
         ctx.lineTo(graphSettings.dataLeft, graphSettings.dataBottom);
         ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(graphSettings.dataRight, graphSettings.dataTop);
+        ctx.lineTo(graphSettings.dataRight, graphSettings.dataBottom);
+        ctx.stroke();
         // draw y axis labels
         ctx.save();
         ctx.textBaseline = 'middle';
-        ctx.textAlign = 'right';
         ctx.font = '10px serif';
         for(var i = graphSettings.minYValue + graphSettings.yAxisIncrement; i < graphSettings.maxYValue; i+=graphSettings.yAxisIncrement) {
             ctx.save();
-            ctx.beginPath();
             var y = graphSettings.dataBottom - (graphSettings.verticalFactor * i);
             y = san(y);
+            // labels on the left
+            ctx.beginPath();
+            ctx.textAlign = 'right';
             ctx.fillText(i, graphSettings.dataLeft-4, y, 30);
             ctx.moveTo(graphSettings.dataLeft-2, y);
             ctx.lineTo(graphSettings.dataLeft+2, y);
+            ctx.stroke();
+            // labels on the right
+            ctx.beginPath();
+            ctx.textAlign = 'left';
+            ctx.fillText(i, graphSettings.dataRight+4, y, 30);
+            ctx.moveTo(graphSettings.dataRight-2, y);
+            ctx.lineTo(graphSettings.dataRight+2, y);
             ctx.stroke();
             
             // draw a horizontal grid line
             ctx.beginPath();
             ctx.strokeStyle = '#d1d1d1';
             ctx.moveTo(graphSettings.dataLeft+4, y);
-            ctx.lineTo(graphSettings.dataRight, y);
+            ctx.lineTo(graphSettings.dataRight-4, y);
             ctx.stroke();
             ctx.restore();
         }
@@ -272,8 +284,8 @@ var TideModel = function(data) {
         self.dataHeight = expectedGraphHeight - (self.yTopMargin + self.yBottomMargin);
         self.dataBottom = self.dataHeight + self.dataTop;
         self.dataLeft = 100;
-        self.dataRight = expectedGraphWidth;
-        self.dataWidth = expectedGraphWidth - self.dataLeft;
+        self.dataRight = expectedGraphWidth - 100;
+        self.dataWidth = self.dataRight - self.dataLeft;
         self.dataHorizontalMidLine = self.dataTop + (self.dataHeight / 2);
         self.maxYValue = 4;
         self.minYValue = 0;
