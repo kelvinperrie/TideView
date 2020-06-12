@@ -54,9 +54,9 @@ var TideModel = function(data) {
     };
 
     self.drawGraph = function(graphData, graphSettings) {
-        console.log("drawing graph")
-        console.log(graphSettings);
-        console.log(graphData);
+        //console.log("drawing graph")
+        //console.log(graphSettings);
+        //console.log(graphData);
         var graphPlotData = graphData.plots;
         var canvas = document.getElementById('canvas');
         var ctx = canvas.getContext('2d');
@@ -77,6 +77,54 @@ var TideModel = function(data) {
         ctx.strokeText(graphData.month, 0, 0);
         ctx.stroke();
         ctx.restore();
+
+
+        // draw vertical grid lines
+        for(var i = 0; i < graphPlotData.length; i++) {
+
+            var x = graphSettings.dataLeft + (i * plotWidth);
+            x = Math.floor(x) + 0.5;
+            ctx.save();
+            // draw a vertical grid line
+            ctx.beginPath();
+            ctx.strokeStyle = '#E2E2E2';
+            ctx.moveTo(x, graphSettings.dataTop);
+            ctx.lineTo(x, graphSettings.dataBottom);
+            ctx.stroke();
+
+            // experiment - gradient fill showing night time
+            // ctx.save();
+            // var nightTimeLength = plotWidth / 2;
+            // ctx.beginPath();
+            // var grd = ctx.createLinearGradient(x, 0, x+nightTimeLength, 0);
+            // grd.addColorStop(0, "#B7B7B7");
+            // grd.addColorStop(1, "white");
+            // ctx.fillStyle = grd;
+            // ctx.fillRect(x, graphSettings.dataTop, nightTimeLength, graphSettings.dataHeight);
+            // ctx.stroke();
+
+            // if(i > 0) {
+            //     ctx.beginPath();
+            //     var grd = ctx.createLinearGradient(x-nightTimeLength, 0, x, 0);
+            //     grd.addColorStop(0, "white");
+            //     grd.addColorStop(1, "#B7B7B7");
+            //     ctx.fillStyle = grd;
+            //     ctx.fillRect(x-nightTimeLength, graphSettings.dataTop, nightTimeLength, graphSettings.dataHeight);
+            //     ctx.stroke();
+            // }
+
+            ctx.restore();
+
+            // x axis labels - put the date in ... somewhere
+            var output = graphPlotData[i].dayMoment.format("D");
+            ctx.beginPath();
+            ctx.textAlign = 'center';
+            ctx.fillText(output, x + (plotWidth / 2), graphSettings.dataBottom + 15);
+            ctx.stroke();
+
+            ctx.restore();
+        }
+
 
         // draw the y axis
         ctx.beginPath();
@@ -112,35 +160,15 @@ var TideModel = function(data) {
             
             // draw a horizontal grid line
             ctx.beginPath();
-            ctx.strokeStyle = '#EFEFEF';
+            ctx.strokeStyle = '#E2E2E2';
             ctx.moveTo(graphSettings.dataLeft+4, y);
             ctx.lineTo(graphSettings.dataRight-4, y);
             ctx.stroke();
+
             ctx.restore();
         }
         ctx.restore();
 
-        // draw vertical grid lines
-        for(var i = 0; i < graphPlotData.length; i++) {
-
-            var x = graphSettings.dataLeft + (i * plotWidth);
-            x = Math.floor(x) + 0.5;
-            ctx.save();
-            // draw a vertical grid line
-            ctx.beginPath();
-            ctx.strokeStyle = '#EFEFEF';
-            ctx.moveTo(x, graphSettings.dataTop);
-            ctx.lineTo(x, graphSettings.dataBottom);
-            ctx.stroke();
-            // x axis labels - put the date in ... somewhere
-            var output = graphPlotData[i].dayMoment.format("D");
-            ctx.beginPath();
-            ctx.textAlign = 'center';
-            ctx.fillText(output, x + (plotWidth / 2), graphSettings.dataBottom + 15);
-            ctx.stroke();
-
-            ctx.restore();
-        }
 
         // draw the tide height values
         var direction = "increasing";
@@ -221,7 +249,7 @@ var TideModel = function(data) {
                 var thisMonth = date.format("MMMM");
                 // if this is a new month then start the data for a new graph and put it into our data set
                 if(thisMonth !== month) {
-                    console.log("doing data for " + thisMonth)
+                    //console.log("doing data for " + thisMonth)
                     month = thisMonth;
                     graphCount = graphCount + 1;
                     var yOffset = (graphCount + 1) * self.expectedGraphHeight;
@@ -238,7 +266,7 @@ var TideModel = function(data) {
                 self.graphs[graphCount].plots.push(day);
             }
         }
-        console.log(self.plotData)
+        //console.log(self.plotData)
     };
 
     var graphSettings = function(expectedGraphHeight, expectedGraphWidth, yOffset) {
