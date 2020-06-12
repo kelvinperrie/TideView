@@ -71,9 +71,10 @@ var TideModel = function(data) {
         ctx.textBaseline = 'middle';
         ctx.textAlign = 'center';
         ctx.font = '50px sans-serif';
+        ctx.strokeStyle = '#999999';
         ctx.translate(50, graphSettings.dataHorizontalMidLine);
         ctx.rotate(270 * Math.PI / 180);
-        ctx.fillText(graphData.month, 0, 0);
+        ctx.strokeText(graphData.month, 0, 0);
         ctx.stroke();
         ctx.restore();
 
