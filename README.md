@@ -2,11 +2,11 @@
 
 1. Visualising all high and low tides for a year
 
-Demo: https://raw.githack.com/kelvinperrie/TideView/master/demo-highsandlows.html
+Demo: https://tideview.netlify.app/demo-highsandlows.html
 
 2. Visualising tide heights using NIWAs tide forcast API. The API gives a height in 10 minute increments; the y axis is the tide height, the x axis is the date/time.
 
-Demo: https://raw.githack.com/kelvinperrie/TideView/master/demo.html
+Demo:  https://tideview.netlify.app/demo.html
 
 7 days:
 
